@@ -4,6 +4,7 @@
 - [Version 1.1 changelog](https://github.com/Nyuuk/minner#version-11-changelog)
 ## Version 1.1 changelog
 ### Menu Verus
+<img src="https://github.com/Nyuuk/minner/menu=verus.png" alt="Menu-Verus" width="200">
 <ul>
   <li>Installer Verus</li>
   <li>Auto Start Verus</li>
