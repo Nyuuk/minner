@@ -3,20 +3,40 @@ clear
 . /etc/nyuuk/miner.var
 
 _edit_pool(){
+	if [ ! -z "$POOL" ]; then
+	  echo -e "POOL default is ${G}$POOL$A"
+	fi
 	read -p 'input pool with port (pool:port) = ' pl
-	echo -e "POOL=$pl" >> $_var
+	if [ ! -z $pl ]; then
+	  sed -si "s/POOL=$POOL/POOL=$pl/g" $_var
+	fi
 }
 _edit_wallet(){
+	if [ ! -z "$WALLET_VERUS" ]; then
+	  echo -e "WALLET_VERUS default is $G$WALLET_VERUS$A"
+	fi
 	read -p 'input wallet verus = ' wl
-	echo -e "WALLET_VERUS=$wl" >> $_var
+	if [ ! -z $wl ]; then
+	sed -si "s/WALLET_VERUS=$WALLET_VERUS/WALLET_VERUS=$wl/g" $_var
+	fi
 }
 _edit_name(){
+	if [ ! -z "$NAME_WORKER" ]; then
+	  echo -e "NAME_WORKER default is $G$NAME_WORKER$A"
+	fi
 	read -p 'input name worker = ' nm
-	echo -e "NAME_WORKER=$nm" >> $_var
+	if [ ! -z $nm ]; then
+	sed -si "s/NAME_WORKER=$NAME_WORKER/NAME_WORKER=$nm/g" $_var
+	fi
 }
 _edit_threads(){
+	if [ ! -z "$THREADS" ]; then
+	  echo -e "THREADS default is $G$THREADS$A"
+	fi
 	read -p 'input threads (only number) = ' th
-	echo -e "THREADS=$th" >> $_var
+	if [ ! -z $th ]; then
+	echo -e "s/THREADS=$THREADS/THREADS=$th/g" $_var
+	fi
 }
 echo -e "Welcome to Verus menu (with ccminer)"
 echo -e "${R}-----------------------------------${A}"
@@ -37,12 +57,11 @@ case $pil in
 1)
 	clear
 	_edit_pool;_edit_wallet;_edit_name;_edit_threads
-	fi
 	sleep 1; echo -e "${G}Install ccminer${A}"
 	apt-get update && apt-get upgrade -y
 	apt-get install -y libcurl4-openssl-dev libssl-dev libjansson-dev automake autotools-dev build-essential git screen
 	mkdir /etc/nyuuk; cd /etc/nyuuk/
-	git clone - -single-branch -b ARM https://github.com/monkins1010/ccminer.git
+	git clone --single-branch -b ARM https://github.com/monkins1010/ccminer.git
 	cd ccminer
 	chmod +x build.sh && chmod +x configure.sh && chmod +x autogen.sh
 	./build.sh
@@ -83,34 +102,54 @@ echo -e "Verus Wallet ${RL}RDtKQGm9JUWUQL7XbGcED35wY6NxbRrVB4${A}"
 exit
 ;;
 2)
-	_pron=`echo -e "[CTRL + A, D] to detach ccminer (on background)"`
+	_pron="[CTRL + A, D] to detach ccminer (on background)"
 	if [ "`systemctl is-active miner-verus`" == 'active' ]; then
 		echo -e "miner-verus is ${G}actived${A} in service systemd"
 		read -p "do you want to start again (y/N) ? " trorno
-		if [ "$trorno" = 'y' ] || [ "$trorno" == 'Y']; then
-			$_pron
-			clear; screen -dmS ver /etc/nyuuk/ccminer/run
+		if [ "$trorno" = 'y' ] || [ "$trorno" == 'Y' ]; then
+			echo -e $_pron
+			clear; screen -S ver /etc/nyuuk/ccminer/run
 		else
 			exit
 		fi
 	else
-		_pron
-		screen -dmS ver /etc/nyuuk/ccminer/run
+    read -p 'Start with systemd (y/N) ? ' yorn
+		if [ "$yorn" = 'y' ] || [ "$yorn" == 'Y' ]; then
+      echo -e "Starting with ${G}SYSTEMD$A"; sleep 1
+	    echo -en "${W}Checking service systemd${A}"; sleep 1
+      systemctl start miner-verus.service
+	    if [ `systemctl is-active miner-verus` == 'active' ];then
+		    echo -e " ${G}Actived$A"
+        echo -e "${G}SUCCES$A"
+	    else
+		    echo -e " ${R}Stoped$A"
+        echo -e "Sorry starting with systemd is failed"
+      fi
+    else
+      echo -e "Starting with ${G}SCREEN$A"
+		  screen -dmS ver /etc/nyuuk/ccminer/run; sleep 1
+      if [ `screen -ls|grep ver|wc -l` == '1' ]; then
+        echo -e "${G}SUCCES"
+      fi
+    fi
 	fi
 ;;
 3)
 	echo -en "${W}Checking service systemd${A}"; sleep 1
-	if [ `systemctl is-active miner-verus` == 'active' ];
-		echo -e "${G}Actived$A"
-		echo -e "${W}Stop service miner-verus"; systemctl stop miner-verus
+	if [ `systemctl is-active miner-verus` == 'active' ];then
+		echo -e " ${G}Actived$A"
+		echo -en "${W}Stop service miner-verus"; systemctl stop miner-verus
+	  if [ `systemctl is-active miner-verus` == 'inactive' ];then
+      echo -e " ${G}SUCCES"
+	  fi
 	else
-		echo -e "${R}Stoped$A"
+		echo -e " ${R}Stoped$A"
 	fi
 	echo -en "${W}Checking service on SCREEN${A}"; sleep 1
-		if [ -z `screen -ls|grep ver` ];
-			echo -e "${R}Stoped$A"
+		if [ -z `screen -ls|grep ver` ];then
+			echo -e " ${R}Stoped$A"
 	else
-		echo -e "${G}Actived$A"
+		echo -e " ${G}Actived$A"
 		echo -e "${W}Stop service SCREEN$A"; kill `screen -ls|grep ver|cut -d '.' -f1|awk '{print $1}'`
 	fi
 ;;
