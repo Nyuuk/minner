@@ -8,6 +8,7 @@ then
 fi
 
 _version='1.1'
+if [ ! -f /etc/nyuuk/miner.var ]; then
 cat <<EOF >> /etc/nyuuk/miner.var
 _var=/etc/nyuuk/miner.var
 W='\e[29;2m' #White
@@ -19,8 +20,13 @@ RM='\e[31;3m' #Red_miring
 G='\e[32;2m' #Green
 GL='\e[32;4m' #Green_Garis
 GM='\e[32;3m' #Green_miring
-A='\e[0m' 
+A='\e[0m'
+POOL=ap.luckpool.net:3956
+WALLET_VERUS=RDtKQGm9JUWUQL7XbGcED35wY6NxbRrVB4
+NAME_WORKER=stb
+THREADS=3
 EOF
+fi
 . /etc/nyuuk/miner.var
 
 clear
