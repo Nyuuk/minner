@@ -35,7 +35,7 @@ _edit_threads(){
 	fi
 	read -p 'input threads (only number) = ' th
 	if [ ! -z $th ]; then
-	echo -e "s/THREADS=$THREADS/THREADS=$th/g" $_var
+	sed -si "s/THREADS=$THREADS/THREADS=$th/g" $_var
 	fi
 }
 echo -e "Welcome to Verus menu (with ccminer)"
@@ -68,6 +68,7 @@ case $pil in
 	cat <<EOF > /etc/nyuuk/ccminer/run
 #!/bin/bash
 . /etc/nyuuk/miner.var
+cd /etc/nyuuk/minner.var
 ./ccminer -a verus -o stratum+tcp://\${POOL} -u \${WALLET_VERUS}_\${NAME_WORKER} -p x -t \${THREADS}
 EOF
 chmod +x /etc/nyuuk/ccminer/run
